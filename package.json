@@ -1,0 +1,17 @@
+﻿{
+  "name": "douyin-spark-kit",
+  "version": "0.1.0",
+  "description": "Douyin (TikTok CN) spark renewal toolkit: QR login, short-url scheme, IM send protocol",
+  "main": "src/qr-login.js",
+  "scripts": {
+    "start": "node src/qr-login.js",
+    "decode": "node src/decode-qr.js"
+  },
+  "keywords": ["douyin", "qrcode", "login", "playwright", "protobuf", "im"],
+  "license": "MIT",
+  "dependencies": {
+    "jsqr": "^1.4.0",
+    "playwright": "^1.49.0",
+    "pngjs": "^7.0.0"
+  }
+}
