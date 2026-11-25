@@ -129,3 +129,20 @@ qrcode_index_url   https://api.amemv.com/ucenter_web/...token=xxx   371 字符
 ## License
 
 MIT
+
+---
+
+## 姊妹项目：伙伴 SparkPal
+
+基于本仓库的协议实现，做了一个面向普通用户的 App：
+
+`
+App（Android）   扫码绑定 → 勾选好友 → 每天自动发 → 火花不断
+服务端            自建一条命令部署，或直接用官方托管
+`
+
+- 客户端与服务端**全部开源**（MIT）
+- 官方托管的差别只有一处：**不用自己养服务器**
+- UI 预览：ssets/ui-preview.png
+- 方案：docs/sparkpal-monorepo-plan.md
+

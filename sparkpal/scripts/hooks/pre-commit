@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# 本地提交门禁：跑不过就别提交
+#
+# 安装：
+#   cp scripts/hooks/pre-commit .git/hooks/pre-commit
+#   chmod +x .git/hooks/pre-commit
+#
+# 跳过（不推荐）：git commit --no-verify
+
+set -e
+
+ROOT=$(git rev-parse --show-toplevel)
+cd "$ROOT"
+
+red()  { printf '\033[31m%s\033[0m\n' "$*"; }
+green(){ printf '\033[32m%s\033[0m\n' "$*"; }
+
+# ── 1. 禁止提交的东西 ──
+echo "[1/4] 检查不该提交的文件"
+bad=$(git diff --cached --name-only --diff-filter=ACM | grep -E '(^|/)\.env$|\.apk$|\.aab$|\.ipa$|^server/spark-api$' || true)
+if [ -n "$bad" ]; then
+  red "这些文件不该提交："
+  echo "$bad"
+  exit 1
+fi
+green "  ok"
+
+# ── 2. 客户端静态检查 ──
+if command -v flutter >/dev/null 2>&1 && [ -d app ]; then
+  echo "[2/4] flutter analyze"
+  (cd app && flutter analyze --no-pub > /tmp/sp-analyze.log 2>&1) || {
+    red "analyze 没过："
+    grep -E "^\s*error" /tmp/sp-analyze.log || tail -20 /tmp/sp-analyze.log
+    exit 1
+  }
+  if grep -qE "^\s*error" /tmp/sp-analyze.log; then
+    red "analyze 有 error"
+    grep -E "^\s*error" /tmp/sp-analyze.log
+    exit 1
+  fi
+  green "  ok"
+else
+  echo "[2/4] 跳过（没有 flutter 或 app/ 不存在）"
+fi
+
+# ── 3. 服务端 go vet ──
+if command -v go >/dev/null 2>&1 && [ -d server ]; then
+  echo "[3/4] go vet + build"
+  (cd server && go vet ./... && CGO_ENABLED=0 go build -o /tmp/spark-api-check ./cmd/spark-api) || {
+    red "go vet / build 没过"
+    exit 1
+  }
+  green "  ok"
+else
+  echo "[3/4] 跳过（没有 go）"
+fi
+
+# ── 4. 单元测试 ──
+if command -v flutter >/dev/null 2>&1 && [ -d app/test ]; then
+  echo "[4/4] flutter test"
+  (cd app && flutter test --no-pub) || { red "测试没过"; exit 1; }
+  green "  ok"
+else
+  echo "[4/4] 跳过"
+fi
+
+green "门禁全过，可以提交"

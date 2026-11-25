@@ -1,0 +1,60 @@
+# 伙伴 SparkPal · 一键部署
+#
+# 用法：
+#   docker compose up -d
+#
+# 首次启动会自动建表、生成密钥、打印配对码。
+
+services:
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-sparkpal_root}
+      MYSQL_DATABASE: sparkpal
+      MYSQL_USER: sparkpal
+      MYSQL_PASSWORD: ${DB_PASSWORD:-sparkpal_pass}
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    image: alpine:3.20
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${PORT:-3210}:3210"
+    environment:
+      PORT: "3210"
+      DB_DSN: "sparkpal:${DB_PASSWORD:-sparkpal_pass}@tcp(db:3306)/sparkpal?parseTime=true&charset=utf8mb4&loc=Local"
+      JWT_SECRET: "${JWT_SECRET:-change_me_in_production}"
+      MODE: "self"
+      OFFICIAL: "false"
+      BILLING: "false"
+      NEED_INVITE: "false"
+      PAIR_CODE: "${PAIR_CODE:-}"
+      SERVER_NAME: "${SERVER_NAME:-我的伙伴服务器}"
+    volumes:
+      - ./bin/spark-api:/usr/local/bin/spark-api:ro
+    command: ["/usr/local/bin/spark-api"]
+
+  qr:
+    # 扫码服务（Playwright）。资源不够可以先不启用，App 里绑定会提示「服务器不支持扫码」。
+    image: mcr.microsoft.com/playwright:v1.49.0-jammy
+    restart: unless-stopped
+    profiles: ["qr"]
+    ports:
+      - "3211:3211"
+    environment:
+      PORT: "3211"
+    volumes:
+      - ../qr:/app
+    working_dir: /app
+    command: ["node", "server.js"]

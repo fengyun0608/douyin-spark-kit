@@ -1,0 +1,19 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="fl" x1="0.2" y1="0.05" x2="0.85" y2="1">
+      <stop offset="0" stop-color="#FFB061"/>
+      <stop offset="0.45" stop-color="#FF6B35"/>
+      <stop offset="1" stop-color="#E5321F"/>
+    </linearGradient>
+  </defs>
+  <!-- 透明底版本：用于导航栏、浅色背景、单色场景 -->
+  <path fill="url(#fl)" d="
+    M 306 92
+    C 312 152, 358 202, 358 272
+    C 358 334, 313 380, 256 380
+    C 199 380, 154 334, 154 272
+    C 154 210, 196 170, 232 138
+    C 224 182, 240 208, 258 212
+    C 270 214, 278 206, 276 192
+    C 272 158, 288 122, 306 92 Z"/>
+</svg>

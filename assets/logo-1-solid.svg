@@ -1,0 +1,20 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="f1" x1="0.2" y1="0.05" x2="0.85" y2="1">
+      <stop offset="0" stop-color="#FFB061"/>
+      <stop offset="0.45" stop-color="#FF6B35"/>
+      <stop offset="1" stop-color="#E5321F"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#f1)"/>
+  <!-- 火苗：缺口做浅，整体更饱满 -->
+  <path fill="#FFFFFF" d="
+    M 296 100
+    C 304 156, 352 204, 352 274
+    C 352 334, 309 378, 256 378
+    C 203 378, 160 334, 160 274
+    C 160 214, 200 176, 234 146
+    C 228 184, 242 206, 258 210
+    C 269 212, 276 205, 274 193
+    C 271 163, 282 128, 296 100 Z"/>
+</svg>

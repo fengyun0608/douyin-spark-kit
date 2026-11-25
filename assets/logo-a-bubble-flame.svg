@@ -1,0 +1,14 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g1" x1="0.15" y1="0" x2="0.85" y2="1">
+      <stop offset="0" stop-color="#FFA45C"/>
+      <stop offset="0.5" stop-color="#FF6B35"/>
+      <stop offset="1" stop-color="#EF2E20"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="#131519"/>
+  <!-- 对话气泡 -->
+  <path d="M256 100c-84 0-152 58-152 130 0 45 27 85 69 110l-16 58 68-37c10 2 21 3 31 3 84 0 152-58 152-134S340 100 256 100z" fill="url(#g1)"/>
+  <!-- 火苗负形：尖头 + 两侧内凹 -->
+  <path d="M258 148c-13 34-46 56-46 92 0 30 21 52 46 52s46-22 46-52c0-24-13-44-28-64-1 14-7 24-16 26-7 1-11-4-10-13 2-13 6-27 8-41z" fill="#131519"/>
+</svg>

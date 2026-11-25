@@ -1,0 +1,38 @@
+# 依赖与构建产物
+**/node_modules/
+**/.dart_tool/
+**/build/
+**/.gradle/
+**/Pods/
+**/vendor/
+dist/
+
+# 环境与密钥
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+**/local.properties
+
+# 安装包与二进制
+*.apk
+*.aab
+*.ipa
+*.exe
+*.so
+sparkpal/server/spark-api
+
+# 符号表（还原崩溃用，不进公开仓库）
+*-symbols.zip
+
+# 编辑器
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# 日志
+*.log
+logs/

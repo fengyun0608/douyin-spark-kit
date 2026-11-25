@@ -1,0 +1,104 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── 门禁 1：客户端 ──
+  app:
+    name: App / analyze + test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: 依赖
+        run: flutter pub get
+
+      - name: 静态检查（0 error 才算过）
+        run: flutter analyze
+
+      - name: 单元测试
+        run: flutter test
+
+      - name: 构建（debug，验证能出包）
+        run: flutter build apk --debug
+
+      - name: 上传产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug
+          path: app/build/app/outputs/flutter-apk/app-debug.apk
+          retention-days: 7
+
+  # ── 门禁 2：服务端 ──
+  server:
+    name: Server / vet + build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          cache-dependency-path: server/go.sum
+
+      - name: 依赖
+        run: go mod download
+
+      - name: go vet
+        run: go vet ./...
+
+      - name: 编译
+        run: CGO_ENABLED=0 go build -trimpath -o /tmp/spark-api ./cmd/spark-api
+
+      - name: 冒烟（起服务打一次 /health）
+        run: |
+          DB_DSN="user:pass@tcp(127.0.0.1:3306)/x" JWT_SECRET=test MODE=self /tmp/spark-api &
+          sleep 2
+          curl -fsS http://127.0.0.1:3210/api/spark/health || (echo "服务没起来"; exit 1)
+
+  # ── 门禁 3：禁止把密钥和二进制推进仓库 ──
+  guard:
+    name: Guard / 禁止密钥与产物
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 检查禁止提交的文件
+        run: |
+          set -e
+          fail=0
+          # 环境变量文件
+          if git ls-files | grep -E '(^|/)\.env$|(^|/)\.env\.(local|prod|production)$'; then
+            echo "::error::检测到 .env 被提交"; fail=1
+          fi
+          # 二进制与安装包
+          if git ls-files | grep -E '\.(apk|aab|ipa)$'; then
+            echo "::error::检测到安装包被提交"; fail=1
+          fi
+          if git ls-files | grep -E '^server/spark-api$'; then
+            echo "::error::检测到编译产物被提交"; fail=1
+          fi
+          # 明显的密钥
+          if git grep -nIE '(BEGIN (RSA|OPENSSH) PRIVATE KEY|AKIA[0-9A-Z]{16})' -- . ; then
+            echo "::error::检测到疑似私钥"; fail=1
+          fi
+          exit $fail

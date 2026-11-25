@@ -6,3 +6,9 @@
 !docs/*.png
 data/
 tmp/
+sparkpal/dist/
+sparkpal/**/build/
+sparkpal/**/.dart_tool/
+sparkpal/**/local.properties
+*.apk
+*-symbols.zip
